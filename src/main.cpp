@@ -1,25 +1,36 @@
 #include <Arduino.h>
-#include <OneButton.h>
-#include "Adafruit_TinyUSB.h"
+#include <WifiConfig.hpp>
+#include <arduino-timer.h>
+#include "secrets.h"
+
+#define PIN_LED 16
 
 bool debug = true;
-OneButton button(GPIO_NUM_23);
-
-uint8_t const desc_hid_report[] = {
-    TUD_HID_REPORT_DESC_KEYBOARD()
-};
+WifiConfig wifiConfig(WIFI_SSID, WIFI_PASSWORD, "ESP32S2 Tester Hub", "s2-tester", AUTH_USER, AUTH_PASS, true, true, debug);
+Timer<1> timer;
 // put function declarations here:
 
 void setup() {
   if (debug) { Serial.begin(115200); delay(10); }
 
-  button.attachClick([]() {
-    if (debug) Serial.println("!btn!");
+  pinMode(PIN_LED, OUTPUT);
+
+  timer.every(660, [](void*) -> bool {
+    if (!wifiConfig.isWifiConnected()) {
+      digitalWrite(PIN_LED, !digitalRead(PIN_LED));
+    } else {
+      digitalWrite(PIN_LED, HIGH);
+    }
+
+    return true;
   });
+  wifiConfig.begin();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  button.tick();
+  wifiConfig.loop();
+  timer.tick<void>();
+  delay(1);
 }
 
