@@ -44,7 +44,7 @@ void serialCb(String buffer) {
   if (buffer == "st") {
     Serial.println("Wifi Status: " + String(WiFi.status()));
   } else if (buffer == "w") {
-    runwifi = !runwifi
+    runwifi = !runwifi;
   } else if (buffer == "sc") {
     ScanWiFi();
   }
