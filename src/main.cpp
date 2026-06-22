@@ -4,7 +4,9 @@
 #include <arduino-timer.h>
 #include "secrets.h"
 
+#ifndef PIN_LED
 #define PIN_LED 16
+#endif
 
 void serialCb(String);
 void ScanWiFi();
@@ -24,7 +26,7 @@ void setup() {
     if (!wifiConfig.isWifiConnected()) {
       digitalWrite(PIN_LED, !digitalRead(PIN_LED));
     } else {
-      digitalWrite(PIN_LED, HIGH);
+      digitalWrite(PIN_LED, LOW);
     }
 
     return true;
@@ -45,8 +47,13 @@ void serialCb(String buffer) {
     Serial.println("Wifi Status: " + String(WiFi.status()));
   } else if (buffer == "w") {
     runwifi = !runwifi;
+    Serial.println("Wifi " + runwifi ? "running" : "paused");
   } else if (buffer == "sc") {
+    if (runwifi) runwifi = false;
+    WiFi.disconnect();
     ScanWiFi();
+  } else if (buffer == "s") {
+    Serial.printf("IP address: %s\n", WiFi.localIP().toString().c_str());
   }
 }
 
