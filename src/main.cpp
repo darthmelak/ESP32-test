@@ -8,6 +8,12 @@
 #define PIN_LED 16
 #endif
 
+#ifdef BOARD_S3
+#define COM_PORT Serial
+#else
+#define COM_PORT Serial
+#endif
+
 void serialCb(String);
 void ScanWiFi();
 
@@ -18,7 +24,7 @@ Timer<1> timer;
 // put function declarations here:
 
 void setup() {
-  if (debug) { Serial.begin(115200); delay(10); }
+  if (debug) { COM_PORT.begin(115200); delay(10); }
 
   pinMode(PIN_LED, OUTPUT);
 
@@ -44,58 +50,58 @@ void loop() {
 
 void serialCb(String buffer) {
   if (buffer == "st") {
-    Serial.println("Wifi Status: " + String(WiFi.status()));
+    COM_PORT.println("Wifi Status: " + String(WiFi.status()));
   } else if (buffer == "w") {
     runwifi = !runwifi;
-    Serial.println("Wifi " + runwifi ? "running" : "paused");
+    COM_PORT.println("Wifi " + runwifi ? "running" : "paused");
   } else if (buffer == "sc") {
     if (runwifi) runwifi = false;
     WiFi.disconnect();
     ScanWiFi();
   } else if (buffer == "s") {
-    Serial.printf("IP address: %s\n", WiFi.localIP().toString().c_str());
+    COM_PORT.printf("IP address: %s\n", WiFi.localIP().toString().c_str());
   }
 }
 
 void ScanWiFi() {
-  Serial.println("Scan start");
+  COM_PORT.println("Scan start");
   // WiFi.scanNetworks will return the number of networks found.
   int n = WiFi.scanNetworks();
-  Serial.println("Scan done");
+  COM_PORT.println("Scan done");
   if (n == 0) {
-    Serial.println("no networks found");
+    COM_PORT.println("no networks found");
   } else {
-    Serial.print(n);
-    Serial.println(" networks found");
-    Serial.println("Nr | SSID                             | RSSI | CH | Encryption");
+    COM_PORT.print(n);
+    COM_PORT.println(" networks found");
+    COM_PORT.println("Nr | SSID                             | RSSI | CH | Encryption");
     for (int i = 0; i < n; ++i) {
       // Print SSID and RSSI for each network found
-      Serial.printf("%2d", i + 1);
-      Serial.print(" | ");
-      Serial.printf("%-32.32s", WiFi.SSID(i).c_str());
-      Serial.print(" | ");
-      Serial.printf("%4" PRIi32, WiFi.RSSI(i));
-      Serial.print(" | ");
-      Serial.printf("%2" PRIi32, WiFi.channel(i));
-      Serial.print(" | ");
+      COM_PORT.printf("%2d", i + 1);
+      COM_PORT.print(" | ");
+      COM_PORT.printf("%-32.32s", WiFi.SSID(i).c_str());
+      COM_PORT.print(" | ");
+      COM_PORT.printf("%4" PRIi32, WiFi.RSSI(i));
+      COM_PORT.print(" | ");
+      COM_PORT.printf("%2" PRIi32, WiFi.channel(i));
+      COM_PORT.print(" | ");
       switch (WiFi.encryptionType(i)) {
-        case WIFI_AUTH_OPEN:            Serial.print("open"); break;
-        case WIFI_AUTH_WEP:             Serial.print("WEP"); break;
-        case WIFI_AUTH_WPA_PSK:         Serial.print("WPA"); break;
-        case WIFI_AUTH_WPA2_PSK:        Serial.print("WPA2"); break;
-        case WIFI_AUTH_WPA_WPA2_PSK:    Serial.print("WPA+WPA2"); break;
-        case WIFI_AUTH_WPA2_ENTERPRISE: Serial.print("WPA2-EAP"); break;
-        case WIFI_AUTH_WPA3_PSK:        Serial.print("WPA3"); break;
-        case WIFI_AUTH_WPA2_WPA3_PSK:   Serial.print("WPA2+WPA3"); break;
-        case WIFI_AUTH_WAPI_PSK:        Serial.print("WAPI"); break;
-        default:                        Serial.print("unknown");
+        case WIFI_AUTH_OPEN:            COM_PORT.print("open"); break;
+        case WIFI_AUTH_WEP:             COM_PORT.print("WEP"); break;
+        case WIFI_AUTH_WPA_PSK:         COM_PORT.print("WPA"); break;
+        case WIFI_AUTH_WPA2_PSK:        COM_PORT.print("WPA2"); break;
+        case WIFI_AUTH_WPA_WPA2_PSK:    COM_PORT.print("WPA+WPA2"); break;
+        case WIFI_AUTH_WPA2_ENTERPRISE: COM_PORT.print("WPA2-EAP"); break;
+        case WIFI_AUTH_WPA3_PSK:        COM_PORT.print("WPA3"); break;
+        case WIFI_AUTH_WPA2_WPA3_PSK:   COM_PORT.print("WPA2+WPA3"); break;
+        case WIFI_AUTH_WAPI_PSK:        COM_PORT.print("WAPI"); break;
+        default:                        COM_PORT.print("unknown");
       }
-      Serial.println();
+      COM_PORT.println();
       delay(10);
     }
   }
 
   // Delete the scan result to free memory for code below.
   WiFi.scanDelete();
-  Serial.println("-------------------------------------");
+  COM_PORT.println("-------------------------------------");
 }
