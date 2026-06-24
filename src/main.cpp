@@ -8,6 +8,15 @@
 #define PIN_LED 16
 #endif
 
+#ifdef RGB_LED
+#include <FastLED.h>
+
+#define NUM_LEDS 1
+#define DATA_PIN 48
+
+CRGB leds[NUM_LEDS];
+bool light = true;
+#endif
 
 void serialCb(String);
 void ScanWiFi();
@@ -15,7 +24,7 @@ void ScanWiFi();
 bool debug = true;
 bool runwifi = true;
 WifiConfig wifiConfig(WIFI_SSID, WIFI_PASSWORD, "ESP32S2 Tester Hub", "s2-tester", AUTH_USER, AUTH_PASS, true, true, debug);
-Timer<1> timer;
+Timer<2> timer;
 // put function declarations here:
 
 void setup() {
@@ -33,6 +42,17 @@ void setup() {
     return true;
   });
   wifiConfig.begin();
+
+  #ifdef RGB_LED
+    FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
+    timer.every(1000, [](void*) -> bool {
+      leds[0] = light ? CRGB::Red4 : CRGB::Black;
+      FastLED.show();
+      light = !light;
+
+      return true;
+    });
+  #endif
 }
 
 void loop() {
